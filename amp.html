@@ -1,0 +1,235 @@
+<script type="text/javascript">
+
+var in_qualtrics = false;
+var debug = true;
+
+//configure image display durations here
+var prime_duration = 75;
+var blank_duration = 125;
+var target_duration = 100;
+var inter_duration = 250;
+
+var controls = {69: 0, 73: 1};
+
+//configure number of tasks for this round
+var num_rounds = 10;
+
+var mask = "https://stanforduniversity.qualtrics.com/CP/Graphic.php?IM=IM_5bVG7EQnl73Aokd"; //url of mask image
+var blank = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_3pD1XkKMyTZzf2B"; //url of blank image, which is literally a blank white rectangle.
+var primesA = []; //urls of unpleasant prime images
+var primesB = []; //urls of pleasant prime images
+
+
+var targets = []; //urls of target images
+
+//replace the urls with the prime image urls and update prime_vals with the corresponding categories
+
+primesA[0] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_0GsDUNybVQdtZxr"; 
+primesA[1] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_dnJntBdyDrNVbKZ"; 
+primesA[2] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_aWXX7RbPpKiwGH3"; 
+primesA[3] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_2uGHScdLfZtyyGx"; 
+
+primesB[0] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_bsl35v6P7HHYMjH"; 
+primesB[1] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_aW30BR9QNbqrf9z"; 
+primesB[2] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_7Q9lBwWvVSgjAC9"; 
+primesB[3] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_5db8lCzchxbJ6fj"; 
+
+//replace the urls here with the target image urls
+targets[0] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_ebyOEZAAAu1TXYF";
+targets[1] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_8nS59bNAEWacRmd";
+targets[2] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_da53QWBNYdUS8ux";
+targets[3] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_8CUbK46pXbCykrH";
+targets[4] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_cXZUFXsG07HaWnX";
+targets[5] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_5cZsfrQY2rbdqGV";
+targets[6] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_dczPznmPObQbMsB";
+targets[7] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_1IfdDyO2rT1UOKp";
+targets[8] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_abfQ7dDBCWoUC8J";
+targets[9] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_af7OAIC7SXuuwSh";
+///////////////////////////////////////////////////////////////////////////////////// You shouldn't need to make edits in this section
+var primes = [primesA, primesB];
+
+get_img_html = function(url){
+	return "<img src=\""+url+"\">";
+};
+
+shuffle = function(o){ 
+	for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+	return o;
+};
+
+multishuffle = function(arrsize, numtrials){
+	var nums = [];
+	for (var i = 0; i < arrsize; i++) {nums[i]=i;}
+	var numshuffles = Math.floor(numtrials/arrsize) + 1;
+	trials = [];
+	for (var i =0; i < numshuffles; i++){trials = trials.concat(shuffle(nums));}
+	return trials.slice(0,numtrials);
+};
+
+balanced_binary_array = function(numtrials){
+	var binarray = [];
+	for (var i = 0; i < numtrials; i++){binarray[i] = i%2;}
+	binarray = shuffle(binarray);
+	return binarray;
+};
+
+write_debug = function(obj){
+	if (debug){
+		console.log(obj);
+	}
+};
+
+///////////////////////////////////////
+
+var running = false;
+var finished = false;
+var lock = true;
+
+var round_idx = 0;
+var round_info = [];
+var trialstart;
+var load_idx;
+
+init = function(){
+
+	write_debug('initializing rounds...');
+	var prime_types = balanced_binary_array(num_rounds);
+	write_debug(prime_types);
+	var target_order = multishuffle(targets.length, num_rounds);
+	write_debug(target_order);
+	var prime_orders = [];
+	for (var i = 0; i < 2; i++){
+		prime_orders.push(multishuffle(primes[i].length, num_rounds / 2));
+	}
+	write_debug(prime_orders);
+
+	var next_idxes = [0,0];
+	for (var i = 0; i < num_rounds; i++){
+		var prime_type = prime_types[i];
+		var prime_index = prime_orders[prime_type][next_idxes[prime_type]];
+		next_idxes[prime_type] += 1;
+		var target_index = target_order[i];
+		var round_object = {
+				prime_type: prime_type,
+				prime_index: prime_index,
+				target_index: target_index
+			};
+		round_info.push(round_object);
+	}
+	write_debug(round_info);
+
+	write_debug('preloading images...');
+	
+	var to_load = [mask].concat([blank]).concat(primes[0])
+					  .concat(primes[1]).concat(targets);
+	var loaded = 0;
+
+	for (var i  = 0; i < to_load.length; i++){
+		var img = new Image();
+		img.src = to_load[i];
+		img.onload = function(){
+			loaded += 1;
+			if (loaded == to_load.length){
+				write_debug('all images loaded');
+				lock = false;
+				document.getElementById('space').innerHTML = "Press space to continue";
+			}
+		}
+	}
+};
+
+start_round = function(){
+	if (finished){
+		document.getElementById("Message").innerHTML = "<br>You may now proceed to the next section.";
+		if (in_qualtrics){
+      	  
+	      document.getElementById(elemid).value = document.getElementById(elemid).value + "END";
+	      $('NextButton').style.display = "inline";
+	    } else {
+	      write_debug('done rounds');
+	    }
+	} else {
+		var curr_round_data = round_info[round_idx];
+		write_debug(curr_round_data);
+		var prime = primes[curr_round_data.prime_type][curr_round_data.prime_index];
+		var target = targets[curr_round_data.target_index];
+		document.getElementById("Message").innerHTML = "<br>" + get_img_html(prime);
+		setTimeout(function(){
+			document.getElementById("Message").innerHTML = "<br>" + get_img_html(blank);
+			setTimeout(function(){
+				document.getElementById("Message").innerHTML = "<br>" + get_img_html(target);
+				setTimeout(function(){
+					document.getElementById("Message").innerHTML = "<br>" + get_img_html(mask);
+					trialstart = new Date().getTime();
+					lock = false;
+				}, target_duration);
+			}, blank_duration);
+		}, prime_duration);
+	}
+};
+
+document.onkeyup = function(e){
+	var KeyID = (window.event) ? event.keyCode: e.keyCode;
+	if (lock) return;
+	if (running){
+		if (!finished){
+			var selected = controls[KeyID];
+			if (typeof(selected) == 'undefined') return;
+
+			lock = true;
+			var time_delta = new Date().getTime() - trialstart;
+			var curr_round_data = round_info[round_idx];
+			var log_entry = curr_round_data.prime_type + '.' + curr_round_data.prime_index + '.'
+								+ curr_round_data.target_index + '.' 
+								+ selected + '.' + time_delta + ',';
+			if (in_qualtrics){
+				document.getElementById(elemid).value = document.getElementById(elemid).value + log_entry;
+			} else {
+				write_debug(log_entry);
+			}
+
+			round_idx += 1;
+			if (round_idx == num_rounds){
+				finished = true;
+			}
+
+			setTimeout(function(){
+				start_round();
+			}, inter_duration);
+
+		}
+	} else if (KeyID == 32){
+		document.getElementById('instructions').style.display = "none";
+		document.getElementById('space').style.display = "none";
+		write_debug('started');
+		running = true;
+		start_round();
+	}
+};
+
+if (in_qualtrics){
+	Qualtrics.SurveyEngine.addOnload(function () { 
+		QRTE.unhideQuestions();
+		$('NextButton').hide();
+		var qid = this.questionId;
+		elemid = "QR~"+qid;
+		init();
+	});
+} else {
+	window.onload = function(){
+		init();
+	};
+}
+
+</script>
+<center><b style="font-size:30px">Unpleasant &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Pleasant</b><br />
+&nbsp;
+<h2 id="Message" style="font-size:30px">+</h2>
+</center>
+&nbsp;
+
+<p id="instructions">This study examines how people make simple judgments. You will see pairs of pictures flashed one after the other. The first is a real-life image. The second is a Chinese character. The real-life image simply serves as a warning signal for the Chinese character and should otherwise be ignored. Your job is to judge the visual pleasantness of the Chinese characters.<br />
+Put your middle or index fingers on the E and I keys of your keyboard. If the Chinese character is less visually pleasing than average, press the E key on the left. If the Chinese character is more visually pleasing than average, press the I key on the right.<br />
+It is important to note that the real-life image can sometimes bias people&rsquo;s judgments of the drawings. Because we are interested in how people can avoid being biased, please try your absolute best not to let the real-life images bias your judgment of the drawings! Give us an honest assessment of the drawings, regardless of the images that precede them.<br />
+<br /></p>
+<p align="center" id="space" style="font-size: 30px">Loading test...</p>
