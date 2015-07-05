@@ -1,0 +1,1 @@
+Police Officer's Dilemma and corresponding output parser. Implements the format from Millisecond (http://www.millisecond.com/download/library/PODT/), as originally specified in Correll, Park & Judd (2002, http://fairandimpartialpolicing.com/docs/pob2.pdf). 

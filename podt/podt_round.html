@@ -1,0 +1,428 @@
+<script type="text/javascript">
+
+var in_qualtrics = true;
+var log_output = true;
+
+var fixation_length = 500;
+var feedback_length = 3000;
+var response_timeout = 850;
+var bg_length_interval = 100;
+var min_bg_length = 5;
+var max_bg_length = 10;
+var max_num_backgrounds = 4;
+
+var points = [5, 10, -40, -20, -10];
+var messages = ["Wise choice!", "Good shot!", "You're dead!", "You shot a good guy!", "Too slow"];
+var colors = ["green", "green", "red", "red", "blue"];
+
+var backgrounds = [];
+var people = [];
+
+backgrounds[0] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_e8Qp3bYDNyPTRyJ&V=1402427513";
+people[0] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_1UiPllWhuF3bJbv&V=1402427520";	
+people[1] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_6mc7YsmOeQJuOPP&V=1402427519";	
+people[2] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_eWppPG643gk1Pil&V=1402427541";	
+people[3] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_6FjE9hNfZp2gGu9&V=1402427546";	
+
+backgrounds[1] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_39oCB6Op5Qwr23b&V=1402427542";
+people[4] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_d57APWGJO1ptxWt&V=1402427544";
+people[5] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_8csESxKz5yYRaHb&V=1402427545";
+people[6] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_4ZKDSJaSLak7D8x&V=1402427547";
+people[7] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_4NjqhZDmZg4SDMF&V=1402427548";
+
+backgrounds[2] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_3r4vDM8H06NK1Ap&V=1402427550";
+people[8] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_a5k3K2sN6illU7X&V=1402427551";
+people[9] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_cPdemPqUkAqfXj7&V=1402427552";
+people[10] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_aVhz32C7vQHarvD&V=1402427554";
+people[11] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_d0VeJy2vyBfiIMB&V=1402427555";
+
+backgrounds[3] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_9uCra5mcfEtlXql&V=1402427556";
+people[12] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_07cWLxi0A5QnNDn&V=1402427557";
+people[13] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_2uv01uTT67zW9LL&V=1402427558";
+people[14] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_agAE5UAoNaON7PD&V=1402427560";
+people[15] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_bDFawGZYYZ7jVFH&V=1402427561";
+
+backgrounds[4] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_0SZAxFndQvsjnW5&V=1402427563";
+people[16] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_0SViTkACM3PJgLH&V=1402427564";
+people[17] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_es7qYPMrfqTYnSR&V=1402427565";
+people[18] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_6L648UsFbCE3EvH&V=1402427567";
+people[19] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_6hdmuTLdhqh6K0t&V=1402427568";
+
+backgrounds[5] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_9Hy7438mD88zJml&V=1418953382";
+people[20] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_eFAAKiF11hFDMLH&V=1418953469";
+people[21] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_d5svQdgEw7tD6ip&V=1418953888";
+people[22] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_9HmymcHM6M7oYpn&V=1418953911";
+people[23] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_41m3XCMvXgD1zBr&V=1418953941";
+
+backgrounds[6] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_29u0cbE5LNA0vPf&V=1418953962";
+people[24] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_6YG5ituERqHkeZT&V=1418954135";
+people[25] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_eDpXDeybZr2WEwR&V=1418954187";
+people[26] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_5stDi7a3zZpB1dj&V=1418954246";
+people[27] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_1LY8htbWVkev965&V=1418954569";
+
+backgrounds[7] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_2nuIX8suDAY06Sp&V=1418954384";
+people[28] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_dbB6glKLdE9F40J&V=1418954409";
+people[29] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_aY918AXtRrbrFqt&V=1418954467";
+people[30] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_6R3G4W5O9Y6r9Zj&V=1418954494";
+people[31] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_9t3iIirK1coSF4p&V=1418954625";
+
+backgrounds[8] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_9tW0UBleEX9AK21&V=1418954661";
+people[32] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_aeEwwVRWSnngGRT&V=1418954683";
+people[33] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_5u6wvV9HfBOVpkh&V=1418954712";
+people[34] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_4I6X9aGDFxNWJnv&V=1418954738";
+people[35] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_a3IOUZAiPe0Eldb&V=1418954828";
+
+backgrounds[9] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_6zqbUR6Z3ZIE44t&V=1418954876";
+people[36] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_bgAunxY23NfigsZ&V=1418954905";
+people[37] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_eCMXvqTbBOXRAtD&V=1418954928";
+people[38] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_03bYrRu3Cvn8NxP&V=1418954965";
+people[39] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_6EaacYZ85MLovCB&V=1418954993";
+
+backgrounds[10] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_0q9caFcjYt2mvXL&V=1418955043";
+people[40] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_aXW8WnbcORCxnb7&V=1418955071";
+people[41] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_eFnkIP6WMjFJmpn&V=1418955098";
+people[42] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_8vHy6F2Y2FhEzat&V=1418955125";
+people[43] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_cusHEocXcI3pf6J&V=1418955159";
+
+backgrounds[11] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_0Dty4m4BDDBdWJL&V=1418955447";
+people[44] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_cNEHFCGzhxbvJhr&V=1418955477";
+people[45] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_5ySPqcjBdpoNgCV&V=1418955507";
+people[46] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_3DDFv8ieSNjbxmR&V=1418955532";
+people[47] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_8wcdaRYLcI8Z7aB&V=1418955567";
+
+backgrounds[12] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_5veTy6CCdH1vfcF&V=1418955593";
+people[48] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_bqP9VUpJaGrgogl&V=1418955615";
+people[49] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_3yJeOAlrENQmTLn&V=1418955830";
+people[50] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_2s2wiQhhJx2oEnj&V=1418955854";
+people[51] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_bOypoNPRGvS4W8d&V=1418955877";
+
+backgrounds[13] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_0wa8SDCSI8KCtcV&V=1418956119";
+people[52] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_0O3LvJoqjDYz0QB&V=1418956142";
+people[53] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_1AH7x1N2gMGYHsh&V=1418956165";
+people[54] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_a3FdBPSITfXnFfD&V=1418956187";
+people[55] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_ePr2v6viMk3Zcyh&V=1418956233";
+
+backgrounds[14] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_1R1XsggkrpNWGnH&V=1418956253";
+people[56] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_3VmyeAhBcRKGONL&V=1418956270";
+people[57] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_2tWb4A23aJjg4cZ&V=1418956286";
+people[58] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_6SDQr4JpVNZJujH&V=1418956352";
+people[59] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_do0OmKDWQQWJ7H7&V=1418956383";
+
+backgrounds[15] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_8uDOsTuvFxItKcJ&V=1418956410";
+people[60] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_6uq1QGW5BH43TIV&V=1418956463";
+people[61] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_82KK5rge60V2nop&V=1418956507";
+people[62] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_24zF7Li9RvXq1z7&V=1418956541";
+people[63] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_a90w1nJCkYmkYFD&V=1418956601";
+
+backgrounds[16] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_9t1wtWZL2AmHBK5&V=1418956641";
+people[64] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_3WX0YGvhKVqmEbH&V=1418956672";
+people[65] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_3QzFFPOv5xogmhL&V=1418956750";
+people[66] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_4YMI47oMeoOq1uJ&V=1418956807";
+people[67] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_aVs3Z9KXIR2GIkd&V=1418956829";
+
+backgrounds[17] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_6DwF34aKvTgZOzb&V=1418957018";
+people[68] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_bI9nUX1b18mcdhP&V=1418957042";
+people[69] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_cIohzR1GLSGcDqt&V=1418957064";
+people[70] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_1Yb8NjbT7MBhQqx&V=1418957094";
+people[71] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_0wDhljWhT5jZNaJ&V=1418957118";
+
+backgrounds[18] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_7Vz4p5Ift7rpXY9&V=1418957140";
+people[72] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_0N6DNUuU4SnOD6l&V=1418957176";
+people[73] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_9GlJrxbrIwcOnhr&V=1418957206";
+people[74] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_02sMduqp0osiUrH&V=1418957225";
+people[75] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_80uGgAIfrsZe5Br&V=1418957241";
+
+backgrounds[19] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_1TtxcJS4Mhsjosl&V=1418957260";
+people[76] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_bPIsJy0YxwAyhPT&V=1418957281";
+people[77] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_0pSxyFVbHp97wX3&V=1418957297";
+people[78] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_8uKPZcLilkT7wMJ&V=1418957327";
+people[79] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_80aeY8Nb1tNFPHD&V=1418957383";
+
+///////////////////////HELPER FUNCTIONS/////////////////////////////////////////////
+var loaded = 0;
+
+function get_img_html(url){
+  return "<img src=\""+url+"\">";
+};
+
+function gen_bg_length(){
+	return bg_length_interval * Math.floor(min_bg_length + Math.random()*(max_bg_length - min_bg_length + 1));
+}
+
+function shuffle(o){ 
+  for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+  return o;
+};
+
+function multishuffle(arrsize, numtrials){
+  var nums = [];
+  for (var i = 0; i < arrsize; i++) {nums[i]=i;}
+  var numshuffles = Math.floor(numtrials/arrsize) + 1;
+  trials = [];
+  for (var i =0; i < numshuffles; i++){trials = trials.concat(shuffle(nums));}
+  return trials.slice(0,numtrials);
+};
+
+function log(text){
+	if (log_output){
+		console.log(text);
+	} 
+};
+
+var shoot_button_assign; // if True, then shoot=A and noshoot=L. if False then swap.
+var shootkey;
+var noshootkey;
+
+var qid;
+
+var order;
+var curr;
+var total;
+
+var score;
+
+var timeout;
+var listening;
+var key_pressed;
+var ready;
+var running;
+
+var timer;
+
+
+function init(){
+
+	log(shoot_button_assign);
+
+	if (shoot_button_assign){
+		shootkey = 65;
+		noshootkey = 76;
+		document.getElementById('shootkey0').innerHTML = 'A';
+		document.getElementById('noshootkey0').innerHTML = 'L';
+		document.getElementById('shootkey1').innerHTML = 'A';
+		document.getElementById('noshootkey1').innerHTML = 'L';
+	} else {
+		shootkey = 76;
+		noshootkey = 65;
+		document.getElementById('shootkey0').innerHTML = 'L';
+		document.getElementById('noshootkey0').innerHTML = 'A';
+		document.getElementById('shootkey1').innerHTML = 'L';
+		document.getElementById('noshootkey1').innerHTML = 'A';
+	}
+
+	total = people.length;
+	order = multishuffle(total, total);
+	log(order);
+	curr = 0;
+
+	score = 0;
+	listening = 0;
+	key_pressed = 0;
+	running = 0;
+	ready = 0;
+
+	var peoplecount = 0;
+	for (var i = 0; i < people.length; i++){
+		var img = new Image();
+		img.src = people[i];
+		img.onload = function(){
+			++peoplecount;
+			if (peoplecount >= people.length){
+				log('loaded all people');
+				var backgroundcount = 0;
+				for (var j = 0; j < backgrounds.length; j++){
+					var img = new Image();
+					img.src = backgrounds[j];
+					img.onload = function(){
+						++backgroundcount;
+						if (backgroundcount >= backgrounds.length){
+							log('loaded all backgrounds');
+							ready = 1;
+							log("all images loaded");
+							document.getElementById("space").innerHTML = "Press SPACE to continue";
+						}
+					}
+				}
+			} 
+		}
+	}
+
+};
+
+if (in_qualtrics){
+	Qualtrics.SurveyEngine.addOnload(function () { 
+		var InputId = $("QR~"+this.questionId);
+  		InputId.style.display="none";
+  		$('NextButton').hide();
+  		qid = "QR~"+this.questionId;
+
+		shoot_button_assign=Qualtrics.SurveyEngine.getEmbeddedData("ShootAssign");
+		log(shoot_button_assign);
+
+		init();
+	});
+} else {
+	window.onload = function(){
+		shoot_button_assign = Math.random() < .5;
+		init();
+	};
+}
+
+function deal_consequence(action){
+
+	var endtime = new Date().getTime();
+	var latency = endtime - timer;
+
+	document.getElementById("target").style.display = "none";
+	document.getElementById("feedback").style.display="initial";
+
+	document.getElementById("feedback_text").innerHTML = messages[action];
+	document.getElementById("feedback_text").style.color = colors[action];
+
+	var sign = "";
+	if (points[action] > 0){
+		sign = "+";
+	}
+	document.getElementById("points").innerHTML = sign+points[action]+" points";
+
+	score += points[action];
+	document.getElementById("score").innerHTML = "Current Score: "+score;
+
+	var writestring = ""+order[curr]+"."+action+"."+latency+", ";
+	if (in_qualtrics){
+		document.getElementById(qid).value = document.getElementById(qid).value + writestring;
+	} else {
+		log(writestring);
+	}
+}
+
+
+
+function do_trial(){
+	if (curr < total){
+		var num_bg = Math.floor(1 + Math.random()*max_num_backgrounds);
+		log("num_bg: "+num_bg);
+
+		var person = order[curr];
+		var type = person % 4;
+		var background = Math.floor(person/4);
+
+		log("person: "+person+", type: "+type+", background: "+background);
+
+		var bgs = multishuffle(backgrounds.length - 1, num_bg - 1);
+		for (var i = 0; i < bgs.length; i++){
+			if (bgs[i] >= background){
+				bgs[i] += 1;
+			}
+		}
+		log("backgrounds: "+bgs)
+		document.getElementById("feedback").style.display = "none";
+		document.getElementById("target").innerHTML = "<br/> +";
+		document.getElementById("target").style.display = "initial";
+		var runfn = function run_trial(){
+			var bg_len = gen_bg_length();
+			log("bg_len: "+bg_len)
+			if (bgs.length == 0){	
+				document.getElementById("target").innerHTML = get_img_html(backgrounds[background]);
+				setTimeout(function (){
+					document.getElementById("target").innerHTML = get_img_html(people[person]);
+					listening = 1;
+					timer = new Date().getTime();
+					timeout = setTimeout(function (){
+						deal_consequence(4);
+						listening = 0;
+						curr += 1;
+						setTimeout("do_trial()", feedback_length);
+					},  response_timeout);
+				}, bg_len);
+				
+			} else {
+				document.getElementById("target").innerHTML = get_img_html(backgrounds[bgs[0]]);
+				bgs = bgs.slice(1);
+				setTimeout(runfn, bg_len);
+			}
+		}
+		setTimeout(runfn, fixation_length);
+
+	} else {
+		
+		document.getElementById("target").style.display = "none";
+		document.getElementById("feedback_text").style.color = "black";
+		document.getElementById("feedback_text").innerHTML = "You have completed the game! Thank you for participating!"
+		document.getElementById("points").style.display = "none";
+		document.getElementById("score").innerHTML = "Your final score is "+score;
+
+		log("Completed game with score "+score);
+		if (in_qualtrics){
+			$('NextButton').show();
+		}
+	}
+
+};
+
+document.onkeyup = function(e){
+	var KeyID = (window.event) ? event.keyCode : e.keyCode;
+	if (listening){
+		clearTimeout(timeout);
+		listening = 0;
+		if (KeyID == shootkey){
+			
+			if (order[curr] % 2){
+				deal_consequence(1);
+			} else {
+				deal_consequence(3);
+			}
+
+		}
+		if (KeyID == noshootkey){
+			
+			if (order[curr] % 2){
+				deal_consequence(2);
+			} else {
+				deal_consequence(0);
+			}
+		}
+		curr += 1;
+		setTimeout("do_trial()",feedback_length)
+	}
+	if (KeyID == 32 && ready == 1 && running == 0){
+		document.getElementById("instructions").style.display = "none";
+		document.getElementById("space").style.display = "none";
+		running = 1;
+		log("running");
+
+		do_trial();
+	}
+};
+
+</script>
+<p id="instructions">You are done with practice. Please proceed to the actual round now. Reminder:<br />
+<br />
+YOUR TASK IS:<br />
+<br />
+To decide as quickly and accurately as possible to shoot or not to shoot.<br />
+<br />
+(1) If the person holds a GUN you need to SHOOT:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; press &quot;<span id="shootkey0">A</span>&quot; on the keyboard (<span id="shootkey1">A</span> = shoot button)<br />
+<br />
+(2) If the person holds a HARMLESS OBJECT, do NOT shoot:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; press &quot;<span id="noshootkey0">L</span>&quot; on the keyboard (<span id="noshootkey1">L</span> = No shoot button)<br />
+<br />
+IMPORTANT: use fingers of different hands for each separate key.<br />
+<br />
+If you are ready, start now.<br />
+&nbsp;</p>
+
+<p align="center" id="space" style="font-size:30px">Loading test...</p>
+
+<div align="center" id="feedback" style="font-size:30px;">
+<p id="feedback_text" style="font-weight:bold;">&nbsp;</p>
+
+<p id="points">&nbsp;</p>
+
+<p id="score">&nbsp;</p>
+</div>
+
+<center>
+<div align="center" id="target" style="font-size:30px" vertical-align="middle">&nbsp;</div>
+</center>

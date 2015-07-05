@@ -1,0 +1,407 @@
+<script type="text/javascript">
+
+///////////////////////RUN CONFIGURATIONS/////////////////////////////////////////////
+
+var in_qualtrics = true;
+var log_output = true;
+
+
+///////////////////////STUDY CONFIGURATIONS/////////////////////////////////////////////
+
+//durations 
+
+var fixation_length = 500;
+var feedback_length = 3000;
+var response_timeout = 850;
+var bg_length_interval = 100;
+var min_bg_length = 5;
+var max_bg_length = 10;
+var max_num_backgrounds = 4;
+
+//scores and feedback
+//listed in order of: correct no-shoot, correct shoot, incorrect no-shoot, incorrect shoot, no response
+
+var points = [5, 10, -40, -20, -10];
+var messages = ["Wise choice!", "Good shot!", "You're dead!", "You shot a good guy!", "Too slow"];
+var colors = ["green", "green", "red", "red", "blue"];
+
+//images
+
+var backgrounds = [];
+var people = [];
+
+/*  convention is as follows: which_bg corresponds to the background of a person image. person images are numbered as such:
+	0 mod 4: white person without gun
+	1 mod 4: white person with gun
+	2 mod 4: black person without gun
+	3 mod 4: black person with gun */
+
+backgrounds[0] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_cZQ9KwOBWpUzWxn&V=1418958041";
+backgrounds[1] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_bwn8Y5y6R4PU6Nv&V=1418958084";
+backgrounds[2] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_1ZaVz4wnDUokyHP&V=1418958139";
+backgrounds[3] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_29ubUmbxc7RPif3&V=1418958161";
+backgrounds[4] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_1ZfkQ6Hosj8zA2N&V=1418958232";
+backgrounds[5] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_dp8DzvnfvK6SAPH&V=1418958274";
+backgrounds[6] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_2gwoOzBAfXSD7M1&V=1418958339";
+backgrounds[7] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_3WeMx74UxK2d1Jz&V=1418958392";
+backgrounds[8] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_bpBg193BFfVx3wh&V=1418958484";
+backgrounds[9] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_5nJoCyzQvgOLmTP&V=1418958523";
+backgrounds[10] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_bCrqnIa6EJFzjpj&V=1418958573";
+backgrounds[11] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_8BNnQWMzqxn4jUV&V=1418958661";
+backgrounds[12] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_9Hs9pshyatFHvrD&V=1418958697";
+backgrounds[13] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_8HRcVW73NJ0X87H&V=1418958750";
+backgrounds[14] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_ahf2Cu2NBe1JFZP&V=1418958794";
+backgrounds[15] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_9MFNe2pmTLtAb6l&V=1418958932";
+backgrounds[16] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_4Gb3KqYDJFGxjA9&V=1418958968";
+backgrounds[17] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_eg0y881ggqECd49&V=1418959009";
+backgrounds[18] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_3gCxaBLKcDTVwNv&V=1418959048";
+backgrounds[19] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_bjX1keMghvrXvY9&V=1418959084";
+
+people[0] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_4OXBCS4Zx9ZLZCB&V=1418958062";
+people[1] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_5mPAPuJ3DIDlDtr&V=1418958181";
+people[2] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_abl8JfZODVbYk6h&V=1418958297";
+people[3] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_cAeVIL01cIBesF7&V=1418958716";
+people[4] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_aeH63Q79C9eQQXb&V=1418958105";
+people[5] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_0PWSJ70jhb5XEUZ&V=1418958361";
+people[6] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_bfMCSa0OjCDjbWR&V=1418958504";
+people[7] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_0PRQIo1uYPbNSUl&V=1418958951";
+people[8] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_1TzLHgiC6Qf6khn&V=1418958209";
+people[9] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_bgAlTmyC3LUf1OZ&V=1418958419";
+people[10] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_9z3ChJSGLq0nusZ&V=1418958545";
+people[11] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_e9wGKM9k5snejhr&V=1418958991";
+people[12] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_0xpzdAoILuNMrhH&V=1418958254";
+people[13] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_emqkyZqYT0QmdEh&V=1418958612";
+people[14] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_5uNkeee9LywwWP3&V=1418958679";
+people[15] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_1A0iyhplZiRZFvT&V=1418959027";
+people[16] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_6DaZSDu2MiBa7uB&V=1418958814";
+people[17] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_7250D5wSXNgzVk1&V=1418959067";
+people[18] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_cu6auNSg1hgK861&V=1418958772";
+people[19] = "https://stanforduniversity.qualtrics.com/ControlPanel/Graphic.php?IM=IM_6L6OtaAEXjFmaZn&V=1418959102";
+
+
+///////////////////////HELPER FUNCTIONS/////////////////////////////////////////////
+
+function get_img_html(url){
+  return "<img src=\""+url+"\">";
+};
+
+function gen_bg_length(){
+	return bg_length_interval * Math.floor(min_bg_length + Math.random()*(max_bg_length - min_bg_length + 1));
+};
+
+function shuffle(o){ 
+  for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+  return o;
+};
+
+function multishuffle(arrsize, numtrials){
+  var nums = [];
+  for (var i = 0; i < arrsize; i++) {nums[i]=i;}
+  var numshuffles = Math.floor(numtrials/arrsize) + 1;
+  trials = [];
+  for (var i =0; i < numshuffles; i++){trials = trials.concat(shuffle(nums));}
+  return trials.slice(0,numtrials);
+};
+
+function log(text){
+	if (log_output){
+		console.log(text);
+	} 
+};
+
+
+///////////////////////ACTUAL PROGRAM/////////////////////////////////////////////
+
+var shoot_button_assign; // if True, then shoot=A and noshoot=L. if False then swap.
+var shootkey;
+var noshootkey;
+
+var qid;
+
+var order;
+var curr;
+var total;
+
+var score;
+
+var timeout;
+var listening;
+var key_pressed;
+var ready;
+var disp_first_instructions;
+var running;
+
+var timer;
+
+function init(){
+
+	log(shoot_button_assign);
+
+	if (shoot_button_assign){
+		shootkey = 65;
+		noshootkey = 76;
+		document.getElementById('shootkey0').innerHTML = 'A';
+		document.getElementById('noshootkey0').innerHTML = 'L';
+		document.getElementById('shootkey1').innerHTML = 'A';
+		document.getElementById('noshootkey1').innerHTML = 'L';
+		document.getElementById('shootkey2').innerHTML = 'A';
+		document.getElementById('noshootkey2').innerHTML = 'L';
+		document.getElementById('shootkey3').innerHTML = 'A';
+		document.getElementById('noshootkey3').innerHTML = 'L';
+	} else {
+		shootkey = 76;
+		noshootkey = 65;
+		document.getElementById('shootkey0').innerHTML = 'L';
+		document.getElementById('noshootkey0').innerHTML = 'A';
+		document.getElementById('shootkey1').innerHTML = 'L';
+		document.getElementById('noshootkey1').innerHTML = 'A';
+		document.getElementById('shootkey2').innerHTML = 'L';
+		document.getElementById('noshootkey2').innerHTML = 'A';
+		document.getElementById('shootkey3').innerHTML = 'L';
+		document.getElementById('noshootkey3').innerHTML = 'A';
+	}
+
+	total = people.length;
+	order = multishuffle(total, total);
+	log(order);
+	curr = 0;
+
+	disp_first_instructions = 0;
+
+
+	score = 0;
+	listening = 0;
+	key_pressed = 0;
+	running = 0;
+	ready = 0;
+	
+	var peoplecount = 0;
+	for (var i = 0; i < people.length; i++){
+		var img = new Image();
+		img.src = people[i];
+		img.onload = function(){
+			++peoplecount;
+			if (peoplecount >= people.length){
+				log('loaded all people');
+				var backgroundcount = 0;
+				for (var j = 0; j < backgrounds.length; j++){
+					var img = new Image();
+					img.src = backgrounds[j];
+					img.onload = function(){
+						++backgroundcount;
+						if (backgroundcount >= backgrounds.length){
+							log('loaded all backgrounds');
+							ready = 1;
+							log("all images loaded");
+							document.getElementById("space").innerHTML = "Press SPACE to continue";
+						}
+					}
+				}
+			} 
+		}
+	}
+
+};
+
+shoot_button_assign = Math.random() < .5;
+
+if (in_qualtrics){
+	Qualtrics.SurveyEngine.addOnload(function () { 
+		var InputId = $("QR~"+this.questionId);
+  		InputId.style.display="none";
+  		$('NextButton').hide();
+  		qid = "QR~"+this.questionId;
+  		Qualtrics.SurveyEngine.setEmbeddedData("ShootAssign",shoot_button_assign);
+		init();
+	});
+} else {
+	window.onload = function(){
+		init();
+	};
+}
+
+function deal_consequence(action){
+
+	var endtime = new Date().getTime();
+	var latency = endtime - timer;
+
+	document.getElementById("target").style.display = "none";
+	document.getElementById("feedback").style.display="initial";
+
+	document.getElementById("feedback_text").innerHTML = messages[action];
+	document.getElementById("feedback_text").style.color = colors[action];
+
+	var sign = "";
+	if (points[action] > 0){
+		sign = "+";
+	}
+	document.getElementById("points").innerHTML = sign+points[action]+" points";
+
+	score += points[action];
+	document.getElementById("score").innerHTML = "Current Score: "+score;
+
+	var writestring = ""+order[curr]+"."+action+"."+latency+", ";
+	if (in_qualtrics){
+		document.getElementById(qid).value = document.getElementById(qid).value + writestring;
+	} else {
+		log(writestring);
+	}
+}
+
+
+
+function do_trial(){
+	if (curr < total){
+		var num_bg = Math.floor(1 + Math.random()*max_num_backgrounds);
+		log("num_bg: "+num_bg);
+
+		var person = order[curr];
+		var type = person % 4;
+		var background = Math.floor(person/4);
+
+		log("person: "+person+", type: "+type+", background: "+background);
+
+		var bgs = multishuffle(backgrounds.length - 1, num_bg - 1);
+		for (var i = 0; i < bgs.length; i++){
+			if (bgs[i] >= background){
+				bgs[i] += 1;
+			}
+		}
+		log("backgrounds: "+bgs)
+		document.getElementById("feedback").style.display = "none";
+		document.getElementById("target").innerHTML = "<br/> +";
+		document.getElementById("target").style.display = "initial";
+		var runfn = function run_trial(){
+			var bg_len = gen_bg_length();
+			log("bg_len: "+bg_len)
+			if (bgs.length == 0){	
+				document.getElementById("target").innerHTML = get_img_html(backgrounds[background]);
+				setTimeout(function (){
+					document.getElementById("target").innerHTML = get_img_html(people[person]);
+					listening = 1;
+					timer = new Date().getTime();
+					timeout = setTimeout(function (){
+						deal_consequence(4);
+						listening = 0;
+						curr += 1;
+						setTimeout("do_trial()", feedback_length);
+					},  response_timeout);
+				}, bg_len);
+				
+			} else {
+				document.getElementById("target").innerHTML = get_img_html(backgrounds[bgs[0]]);
+				bgs = bgs.slice(1);
+				setTimeout(runfn, bg_len);
+			}
+		}
+		setTimeout(runfn, fixation_length);
+
+	} else {
+		
+		document.getElementById("target").style.display = "none";
+		document.getElementById("feedback_text").style.color = "black";
+		document.getElementById("feedback_text").innerHTML = "You have completed the practice round! Please click to continue!"
+		document.getElementById("points").style.display = "none";
+		document.getElementById("score").innerHTML = "Your score is "+score;
+
+		log("Completed game with score "+score);
+		if (in_qualtrics){
+			$('NextButton').show();
+		}
+	}
+
+};
+
+document.onkeyup = function(e){
+	var KeyID = (window.event) ? event.keyCode : e.keyCode;
+	if (listening){
+		clearTimeout(timeout);
+		listening = 0;
+		if (KeyID == shootkey){
+			
+			if (order[curr] % 2){
+				deal_consequence(1);
+			} else {
+				deal_consequence(3);
+			}
+
+		}
+		if (KeyID == noshootkey){
+			
+			if (order[curr] % 2){
+				deal_consequence(2);
+			} else {
+				deal_consequence(0);
+			}
+		}
+		curr += 1;
+		setTimeout("do_trial()",feedback_length)
+	}
+
+	if (KeyID == 32 && disp_first_instructions == 0){
+		log("displaying intermediate page...please???");
+		document.getElementById("instructions0").style.display = "none";
+		document.getElementById("instructions1").style.display = "block";
+		if (ready != 1){
+			document.getElementById("space").innerHTML = "Loading test...";
+		}
+		disp_first_instructions = 1;
+
+	} else if (KeyID == 32 && ready == 1 && running == 0 && disp_first_instructions == 1){
+		document.getElementById("instructions1").style.display = "none";
+		document.getElementById("space").style.display = "none";
+		running = 1;
+		log("running");
+
+		do_trial()
+	}
+};
+
+</script>
+<p id="instructions0">In this videogame, your task is to shoot any person who is holding a gun (the bad guys) by pressing the &quot;<span id="shootkey0">A</span>&quot; button on your keyboard (<span id="shootkey1">A</span> = shoot button).<br />
+<br />
+If a person is holding something other than a gun he is a good guy, and you should press the &quot;<span id="noshootkey0">L</span>&quot; button on your keyboard ( <span id="noshootkey1">L</span>= NO shoot button).<br />
+<br />
+You will have less than a second to make each decision.<br />
+<br />
+You will receive points based on your performance.<br />
+<br />
+The first round of the game is for practice.<br />
+<br />
+If you are ready to begin the practice round, press the SPACE BAR.<br />
+&nbsp;</p>
+
+<div id="instructions1" style="display: none;">
+<center>This is a PRACTICE SESSION.</center>
+<br />
+<br />
+Reminder:<br />
+<br />
+YOUR TASK IS:<br />
+<br />
+To decide as quickly and accurately as possible to shoot or not to shoot.<br />
+<br />
+(1) If the person holds a GUN you need to SHOOT:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; press &quot;<span id="shootkey2">A</span>&quot; on the keyboard (<span id="shootkey3">A</span> = shoot button)<br />
+<br />
+(2) If the person holds a HARMLESS OBJECT, do NOT shoot:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; press &quot;<span id="noshootkey2">L</span>&quot; on the keyboard (<span id="noshootkey3">L</span> = No shoot button)<br />
+<br />
+IMPORTANT: use fingers of different hands for each separate key.<br />
+<br />
+<br />
+&nbsp;</div>
+
+<p align="center" id="space" style="font-size:30px">&nbsp;</p>
+
+<div align="center" id="feedback" style="font-size:30px;">
+<p id="feedback_text" style="font-weight:bold;">&nbsp;</p>
+
+<p id="points">&nbsp;</p>
+
+<p id="score">&nbsp;</p>
+</div>
+
+<center>
+<div align="center" id="target" style="font-size:30px" vertical-align="middle">&nbsp;</div>
+</center>
