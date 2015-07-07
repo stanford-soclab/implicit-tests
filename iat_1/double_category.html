@@ -1,0 +1,301 @@
+<script type="text/javascript">
+
+//set number of tasks for this block
+var num_tasks = 20;
+
+//first type of target
+var xisImage = true; //true if we use image targets, false if we use word targets.
+var xcatA = []; //left category
+var xcatB = []; //right category
+//set targets here
+xcatA[0] = "https://stanforduniversity.qualtrics.com/CP/Graphic.php?IM=IM_0UrNqhrO0cHK7GJ";
+xcatA[1] = "https://stanforduniversity.qualtrics.com/CP/Graphic.php?IM=IM_6i19sMg3xTEXGBf";
+xcatA[2] = "https://stanforduniversity.qualtrics.com/CP/Graphic.php?IM=IM_bp8Xv9F6IfSHPtX";
+xcatA[3] = "https://stanforduniversity.qualtrics.com/CP/Graphic.php?IM=IM_6QN1xe9RQUbYDOJ";
+xcatA[4] = "https://stanforduniversity.qualtrics.com/CP/Graphic.php?IM=IM_cGicPC1QzJMrHWR";
+xcatA[5] = "https://stanforduniversity.qualtrics.com/CP/Graphic.php?IM=IM_1Apz2zVmnYz17zT";
+
+xcatB[0] = "https://stanforduniversity.qualtrics.com/CP/Graphic.php?IM=IM_2lxapSOQCuT4eVv";
+xcatB[1] = "https://stanforduniversity.qualtrics.com/CP/Graphic.php?IM=IM_8pHtXVFAGsPQLVr";
+xcatB[2] = "https://stanforduniversity.qualtrics.com/CP/Graphic.php?IM=IM_eKU6wKrSaJr0uhf";
+xcatB[3] = "https://stanforduniversity.qualtrics.com/CP/Graphic.php?IM=IM_9WDpULbJI8B4q0t";
+xcatB[4] = "https://stanforduniversity.qualtrics.com/CP/Graphic.php?IM=IM_0HcF7EsFIxCwxVz";
+xcatB[5] = "https://stanforduniversity.qualtrics.com/CP/Graphic.php?IM=IM_dokWcJD7Ax8FKol";
+
+//second type of target
+var yisImage = false; //true if we use image targets, false if we use word targets.
+var ycatA = []; //left category
+var ycatB = []; //right category
+//set targets here
+ycatA[0] = "<b style='color:chartreuse'>Marvelous</b>";
+ycatA[1] = "<b style='color:chartreuse'>Superb</b>";
+ycatA[2] = "<b style='color:chartreuse'>Pleasure</b>";
+ycatA[3] = "<b style='color:chartreuse'>Beautiful</b>";
+ycatA[4] = "<b style='color:chartreuse'>Joyful</b>";
+ycatA[5] = "<b style='color:chartreuse'>Glorious</b>";
+ycatA[6] = "<b style='color:chartreuse'>Lovely</b>";
+ycatA[7] = "<b style='color:chartreuse'>Wonderful</b>";
+
+ycatB[0] = "<b style='color:chartreuse'>Tragic</b>";
+ycatB[1] = "<b style='color:chartreuse'>Horrible</b>";
+ycatB[2] = "<b style='color:chartreuse'>Agony</b>";
+ycatB[3] = "<b style='color:chartreuse'>Painful</b>";
+ycatB[4] = "<b style='color:chartreuse'>Terrible</b>";
+ycatB[5] = "<b style='color:chartreuse'>Awful</b>";
+ycatB[6] = "<b style='color:chartreuse'>Humiliate</b>";
+ycatB[7] = "<b style='color:chartreuse'>Nasty</b>";
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+//nice utility functions. NOTE: image preloading is kind of broken.
+// we got away with it because there were so few images, but for peace of mind 
+// and fixes, see the other IAT-type tests in the same project.
+
+//image handling
+function get_img_html(url){
+  return "<img src=\""+url+"\">";
+};
+
+function preload_img(url){
+  var img = new Image();
+  img.src = url;
+};
+
+function preload_array(arr){
+  for (var i = 0; i < arr.length; i++){ preload_img(arr[i]); }
+};
+
+//shuffle
+function shuffle(o){ 
+  for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+  return o;
+};
+
+function multishuffle(arrsize, numtrials){
+  var nums = [];
+  for (var i = 0; i < arrsize; i++) {nums[i]=i;}
+  var numshuffles = Math.floor(numtrials/arrsize) + 1;
+  trials = [];
+  for (var i =0; i < numshuffles; i++){trials = trials.concat(shuffle(nums));}
+  return trials.slice(0,numtrials);
+};
+
+function category_array(numtrials){
+  var cat_array = [];
+  for (var i = 0; i < numtrials; i++){cat_array[i] = i%2;}
+  cat_array = shuffle(cat_array);
+  return cat_array;
+}
+
+function balanced_randomize(numtrials, arrsize, category_array){
+  var arrA = multishuffle(arrsize, numtrials/2);
+  var arrB = multishuffle(arrsize, numtrials/2);
+  var neworder = [];
+  var a = 0;
+  var b = 0;
+  for (var i = 0; i < numtrials; i++){ //1s correspond to array A, 0s correspond to array B
+    if (category_array[i]){
+      neworder[i] = arrA[a];
+      a += 1;
+    } else{
+      neworder[i] = arrB[b];
+      b += 1;
+    }
+  }
+  return neworder;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//actual program
+
+var t = 0;
+var c = 0;
+var running = 0;
+var elemid;
+var xcats;
+var xorder;
+var ycats;
+var yorder;
+
+Qualtrics.SurveyEngine.addOnload(function () //create Qualtrics.SurveyEngine.QuestionData object 
+{ 
+  $('NextButton').hide();
+  var qid = this.questionId;
+  elemid = "QR~"+qid;
+  if (xisImage){
+    preload_array(xcatA);
+    preload_array(xcatB);
+  }
+  if (yisImage){
+    preload_array(ycatA);
+    preload_array(ycatB);
+  }
+  xcats = category_array(num_tasks/2);
+  xorder = balanced_randomize(num_tasks/2, xcatA.length, xcats);
+
+  //console.log(xcats);
+  //console.log(xorder);
+
+  ycats = category_array(num_tasks/2);
+  yorder = balanced_randomize(num_tasks/2, ycatA.length, ycats);
+
+  //console.log(ycats);
+  //console.log(yorder);
+});
+
+function start_it() {
+  if (c < num_tasks) {
+    var day = new Date(); trialstart = day.getTime();
+    var input;
+    if (c % 2 == 0){
+      var d = c/2;
+      if (xcats[d]){
+        input = xisImage ? get_img_html(xcatA[xorder[d]]) : xcatA[xorder[d]];
+      } else {
+        input = xisImage ? get_img_html(xcatB[xorder[d]]) : xcatB[xorder[d]];
+      }
+      document.getElementById("Message").innerHTML = "<br>" + input;
+      //console.log("We printed "+xorder[d] + " with "+xcats[d]);  
+    } else {
+      var d = (c-1)/2;
+      if (ycats[d]){
+        input = yisImage ? get_img_html(ycatA[yorder[d]]) : ycatA[yorder[d]];
+      } else {
+        input = yisImage ? get_img_html(ycatB[yorder[d]]) : ycatB[yorder[d]];
+      }
+      document.getElementById("Message").innerHTML = "<br>" + input;
+      //console.log("We printed "+yorder[d] + " with "+ycats[d]);
+    }
+    
+
+  }
+  else {
+    clearInterval(t)
+    document.getElementById("Message").innerHTML = "<br>You may now proceed to the next section.";
+    document.getElementById(elemid).value = document.getElementById(elemid).value + "END";
+    $('NextButton').show();
+  }
+}
+
+document.onkeyup = function(e){
+  var KeyID = (window.event) ? event.keyCode : e.keyCode;
+  if (c < num_tasks) {
+    if(KeyID == 69)  {
+      var day = new Date(); trialend = day.getTime();
+      rt = trialend - trialstart;
+      if (c % 2 == 0){
+        var d = c/2;
+        if(xcats[d]){
+          var entry = xorder[d] + "." + "C" + "." + xcats[d] + "." + rt + ",";
+          //console.log(entry);
+          document.getElementById(elemid).value = document.getElementById(elemid).value + entry;
+          document.getElementById("Message").innerHTML = "<br>+";
+          c=c+1;
+          t = setTimeout('start_it();',250);
+        }
+        else{
+          var entry = xorder[d] + "." + "X" + "." + xcats[d] + "." + rt + ",";
+          //console.log(entry);
+          document.getElementById(elemid).value = document.getElementById(elemid).value + entry;
+          document.getElementById("Message").innerHTML = "<b style='color:red;font-size:80px'>X</b>";
+          c = c+1;
+          t = setTimeout('document.getElementById("Message").innerHTML = "<br>+";',250);
+          t = setTimeout('start_it();',500);
+        }  
+      } else {
+        var d = (c-1)/2;
+        if(ycats[d]){
+          var entry = yorder[d] + "." + "C" + "." + ycats[d] + "." + rt + ",";
+          //console.log(entry);
+          document.getElementById(elemid).value = document.getElementById(elemid).value + entry;
+          document.getElementById("Message").innerHTML = "<br>+";
+          c=c+1;
+          t = setTimeout('start_it();',250);
+        }
+        else{
+          var entry = yorder[d] + "." + "X" + "." + ycats[d] + "." + rt + ",";
+          //console.log(entry);
+          document.getElementById(elemid).value = document.getElementById(elemid).value + entry;
+          document.getElementById("Message").innerHTML = "<b style='color:red;font-size:80px'>X</b>";
+          c = c+1;
+          t = setTimeout('document.getElementById("Message").innerHTML = "<br>+";',250);
+          t = setTimeout('start_it();',500);
+        }
+      }
+          
+    }
+    
+    if(KeyID == 73)  {
+      var day = new Date(); trialend = day.getTime();
+      rt = trialend - trialstart;
+      if (c % 2 == 0){
+        var d = c/2;
+        if(!xcats[d]){
+          var entry = xorder[d] + "." + "C" + "." + xcats[d] + "." + rt + ",";
+          //console.log(entry);
+          document.getElementById(elemid).value = document.getElementById(elemid).value + entry;
+          document.getElementById("Message").innerHTML = "<br>+";
+          c=c+1;
+          t = setTimeout('start_it();',250);
+        }
+        else{
+          var entry = xorder[d] + "." + "X" + "." + xcats[d] + "." + rt + ",";
+          //console.log(entry);
+          document.getElementById(elemid).value = document.getElementById(elemid).value + entry;
+          document.getElementById("Message").innerHTML = "<b style='color:red;font-size:80px'>X</b>";
+          c = c+1;
+          t = setTimeout('document.getElementById("Message").innerHTML = "<br>+";',250);
+          t = setTimeout('start_it();',500);
+        }  
+      } else {
+        var d = (c-1)/2;
+        if(!ycats[d]){
+          var entry = yorder[d] + "." + "C" + "." + ycats[d] + "." + rt + ",";
+          //console.log(entry);
+          document.getElementById(elemid).value = document.getElementById(elemid).value + entry;
+          document.getElementById("Message").innerHTML = "<br>+";
+          c=c+1;
+          t = setTimeout('start_it();',250);
+        }
+        else{
+          var entry = yorder[d] + "." + "X" + "." + ycats[d] + "." + rt + ",";
+          //console.log(entry);
+          document.getElementById(elemid).value = document.getElementById(elemid).value + entry;
+          document.getElementById("Message").innerHTML = "<b style='color:red;font-size:80px'>X</b>";
+          c = c+1;
+          t = setTimeout('document.getElementById("Message").innerHTML = "<br>+";',250);
+          t = setTimeout('start_it();',500);
+        }
+      }
+          
+    
+        
+    }
+
+    if(KeyID == 32)  {
+      if (running == 0) {
+        document.getElementById('instructions').style.display = "none";
+        c = 0;
+        running = 1;
+        start_it();
+      }
+    }
+  }
+
+};
+
+
+</script>
+<center><b style="font-size:30px">White American &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Black American</b>&nbsp;</center>
+
+<center><b style="font-size:20px">or &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; or</b><br />
+<b style="color:chartreuse;font-size:30px">Good &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Bad</b>
+
+<h2 id="Message" style="font-size:30px">+</h2>
+&nbsp;
+
+<p id="instructions">The four categories you saw separately now appear together, but the rules are still the same.<br />
+Remember, each item belongs to only one group. For example, if the categories flower and good appeared on the separate sides above - pictures or words meaning flower would go in the flower category, not the good category. The green and white labels and items may help to identify the appropriate category. Use the E and I keys to categorize items into four groups left and right, and correct errors by hitting the other key. Press SPACE to continue.<br />
+Part 3 of 7</p>
+</center>

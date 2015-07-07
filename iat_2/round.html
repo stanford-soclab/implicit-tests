@@ -1,0 +1,352 @@
+<script type="text/javascript">
+
+var in_qualtrics = false;
+var debug = true;
+
+//configure task display durations here. times in ms
+var focus_duration = 300;
+var focus_stim = "+";
+var prime_duration = 150;
+var mask_duration = 150;
+var mask = "XXXXXXXXXX";
+var intertrial_duration = 750;
+
+var controls = {65: 0, 76: 1}; //keycodes for left and right categories
+
+//set number of rounds for this block
+var num_rounds = 96;
+var num_practice = 4;
+
+var catA = []; //left category
+var catB = []; //right category
+
+//primes
+var primes = ["water","pencil"];
+
+//set targets here
+
+catA[0] = "clean"
+catA[1] = "wash";
+catA[2] = "scrub";
+catA[3] = "soap";
+catA[4] = "shower";
+catA[5] = "rinse";
+catA[6] = "cup";
+catA[7] = "bottle";
+catA[8] = "drink";
+catA[9] = "glass";
+catA[10] = "mug";
+catA[11] = "liquid";
+catA[12] = "irrigate";
+catA[13] = "ocean";
+catA[14] = "swim";
+catA[15] = "rain";
+catA[16] = "river";
+catA[17] = "flood";
+catA[18] = "speaker";
+catA[19] = "town";
+catA[20] = "paper";
+catA[21] = "sheet";
+catA[22] = "radio";
+catA[23] = "music";
+
+catB[0] = "sast";
+catB[1] = "imm";
+catB[2] = "citia";
+catB[3] = "snard";
+catB[4] = "terhed";
+catB[5] = "dagon";
+catB[6] = "adhem";
+catB[7] = "dangla";
+catB[8] = "andis";
+catB[9] = "strobi";
+catB[10] = "poseb";
+catB[11] = "joul";
+catB[12] = "halco";
+catB[13] = "sopha";
+catB[14] = "pone";
+catB[15] = "metens";
+catB[16] = "distat";
+catB[17] = "climp";
+catB[18] = "fective";
+catB[19] = "tardue";
+catB[20] = "oduca";
+catB[21] = "biana";
+catB[22] = "maleon";
+catB[23] = "preits";
+
+
+// configure practice
+
+var practice_round_info = [
+		{
+			word_index: 'p0',
+			word: 'coffee',
+			prime_type: 0,
+			category: 0
+		},
+		{
+			word_index: 'p1',
+			word: 'brillig',
+			prime_type: 1,
+			category: 1
+		},
+		{
+			word_index: 'p2',
+			word: 'tove',
+			prime_type: 0,
+			category: 1
+		},
+		{
+			word_index: 'p3',
+			word: 'tea',
+			prime_type: 1,
+			category: 0
+		}
+	
+	];
+
+var target_arrays = [catA, catB];
+
+
+
+/////////////////////////////////////////////////////////////
+
+shuffle = function(o){ 
+	for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+	return o;
+};
+
+multishuffle = function(arrsize, numtrials){
+	var nums = [];
+	for (var i = 0; i < arrsize; i++) {nums[i]=i;}
+	var numshuffles = Math.floor(numtrials/arrsize) + 1;
+	trials = [];
+	for (var i =0; i < numshuffles; i++){trials = trials.concat(shuffle(nums));}
+	return trials.slice(0,numtrials);
+};
+
+balanced_binary_array = function(numtrials){
+	var binarray = [];
+	for (var i = 0; i < numtrials; i++){binarray[i] = i%2;}
+	binarray = shuffle(binarray);
+	return binarray;
+};
+
+write_debug = function(obj){
+	if (debug){
+		console.log(obj);
+	}
+};
+
+///////////////////////////////////////////////////////////
+
+var running = false;
+var paused = false;
+var in_practice = false;
+var in_actual = false;
+var finished = false;
+var lock = true;
+
+//var t = 0; //timer
+var practice_round_idx = 0;
+var round_idx = 0; // how many rounds have elapsed
+
+var round_info = []; // dictionary of objects with keys: word_index, word, prime, category
+var trialstart;
+var waswrong = false;
+
+var elemid; //qualtrics only. the ID of the write-to element.
+///////////////////////////////////////////////////////////
+
+init = function(){
+	write_debug('initializing...');
+	var target_or_nonsense = balanced_binary_array(num_rounds);
+	var next_prime_type = [];
+	var order = [];
+	for (var i = 0; i < 2; i++){
+		next_prime_type.push(balanced_binary_array(target_arrays[i].length));
+		order.push(multishuffle(target_arrays[i].length, target_arrays[i].length*2));
+	}
+	write_debug(target_or_nonsense);
+	write_debug(next_prime_type);
+	write_debug(order);
+	var next_idx = [0,0];
+	for (var i = 0; i < num_rounds; i++){
+		var cat = target_or_nonsense[i];
+		var word_index = order[cat][next_idx[cat]];
+		next_idx[cat] += 1;
+		var prime_type = next_prime_type[cat][word_index];
+		next_prime_type[cat][word_index] = !prime_type + 0;
+		var round_object = {
+				word_index: word_index,
+				prime_type: prime_type,
+				category: cat,
+				word: target_arrays[cat][word_index]
+			};
+		round_info.push(round_object);
+	}
+	write_debug(round_info);
+	if (debug){
+		var print_string = '';
+		for (var i = 0; i < round_info.length; i++){
+			print_string += i + ',' + round_info[i].category + ',';
+			print_string += round_info[i].prime_type + ',';
+			print_string += round_info[i].word_index + '\n';
+		}
+		console.log(print_string);
+	}
+	
+
+}
+
+if (in_qualtrics){
+	Qualtrics.SurveyEngine.addOnload(function () { 
+		/*QRTE.unhideQuestions();
+		$('NextButton').hide();
+		var qid = this.questionId;
+		elemid = "QR~"+qid;
+		document.getElementById(elemid).style.display = "none";*/
+		init();
+	});
+} else {
+	window.onload = function(){
+		init();
+	};
+}
+
+start_round = function(){
+	if (finished){
+		//clearInterval(t);
+		document.getElementById("Message").innerHTML = "<br>You may now proceed to the next section.";
+		if (in_qualtrics){
+      	  
+	      document.getElementById(elemid).value = document.getElementById(elemid).value + "END";
+	      $('NextButton').style.display = "inline";
+	      write_debug('fff display next button');
+	    } else {
+	      write_debug('done rounds');
+	    }
+	} else {
+		var curr_round_data = {}
+		if (in_practice){
+			curr_round_data = practice_round_info[practice_round_idx];
+		} else {
+			curr_round_data = round_info[round_idx];
+		}
+		write_debug(curr_round_data);
+		var input = curr_round_data.word;
+		var prime = primes[curr_round_data.prime_type];
+		document.getElementById("Message").innerHTML = "<br>" + focus_stim;
+		setTimeout(function(){
+			document.getElementById("Message").innerHTML = "<br>" + prime;
+			setTimeout(function(){
+				document.getElementById("Message").innerHTML = "<br>" + mask;
+				setTimeout(function(){
+					document.getElementById("Message").innerHTML = "<br>" + input;
+					lock = false;
+					trialstart = new Date().getTime();
+				}, mask_duration)
+			}, prime_duration);
+		}, focus_duration);
+		
+	}
+	
+
+} 
+
+document.onkeyup = function(e){
+	var KeyID = (window.event) ? event.keyCode : e.keyCode;
+
+	if (running){
+		if (!finished && !lock){
+
+			var selected_cat = controls[KeyID];
+			if (typeof(selected_cat) != 'undefined'){ 
+				lock = true;
+				var time_delta = new Date().getTime() - trialstart;
+
+				var curr_round_data = {}
+				if (in_practice){
+					curr_round_data = practice_round_info[practice_round_idx];
+				} else {
+					curr_round_data = round_info[round_idx];
+				}
+
+				if (selected_cat != curr_round_data.category){
+					document.getElementById("Message").innerHTML = "<b style='color:red;font-size:80px'>X</b>";
+					waswrong = true;
+					lock = false;
+					return;
+				}
+				if (waswrong){
+					selected_cat = 1-selected_cat;
+					waswrong = false;
+				}
+				var log_entry = curr_round_data.word_index + '.' + curr_round_data.category + '.';
+				log_entry += curr_round_data.prime_type + '.' + selected_cat + '.' + time_delta + ',';
+				if (in_qualtrics){
+		          document.getElementById(elemid).value = document.getElementById(elemid).value + log_entry;
+		          
+		        } else {
+		          write_debug(log_entry);
+		        }
+
+		        if (in_practice){
+		        	practice_round_idx += 1;
+		        	if (practice_round_idx == practice_round_info.length){
+		        		in_practice = false;
+		        		in_actual = true;
+		        		paused = true;
+		        		running = false;
+		        		write_debug('done practice');
+		        		document.getElementById("Message").innerHTML = "";
+		        		document.getElementById('instructions').style.display = "inline";
+		        		document.getElementById('instructions').innerHTML="You are now done practice. Please press space to move onto the actual round.";
+		        	}
+		        } else {
+		        	round_idx += 1;
+		        	if (round_idx == num_rounds){
+		        		in_actual = false;
+		        		finished = true;
+		        	}
+		        }
+		        if (!paused){
+			        setTimeout(function(){
+			        	start_round();
+			        }, intertrial_duration);
+			    }
+
+			} 
+		}
+	} else if (paused){
+		if (KeyID == 32){
+			document.getElementById('instructions').style.display = "none";
+			paused = false;
+			running = true;
+			start_round();
+		}
+	} else {
+		if (KeyID == 32){
+			document.getElementById('instructions').style.display="none";
+			running = true;
+			in_practice = true;
+			write_debug('started rounds');
+			start_round();
+		}
+	}
+};
+
+
+</script>
+
+<center><p id="labels" style="font-size:30px"><b>Real Word &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Nonsense Word</b></p>
+<h2 id="Message" style="font-size:30px">+</h2>
+&nbsp;
+
+<p id="instructions">You will use the key A for real words and the L key for nonsense words.  Please keep your fingers on these two keys in order to respond as quickly and as accurately as possible.<br />
+We will keep the labels on the screen for the first several trials so that you can remember which keys to press.<br />
+Remember, your data are very valuable, and we hope you take the task seriously.  Thank you for participating!<br/>
+Press space bar to start the trials.<br />
+</p>
+</center>

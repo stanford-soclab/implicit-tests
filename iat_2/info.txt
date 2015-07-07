@@ -1,0 +1,1 @@
+Implicit Association Test programmed for a study conducted by the Stanford GSB (PI: Szu-Chi Huang). 

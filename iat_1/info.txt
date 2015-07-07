@@ -1,0 +1,1 @@
+Implicit Association Test as implemented by http://www.millisecond.com/download/library/IAT/ . This folder contains two sample rounds out of seven. In the actual study, seven rounds were run in total, mirroring the millisecond implementation. 

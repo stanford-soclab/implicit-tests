@@ -1,0 +1,200 @@
+<script type="text/javascript">
+
+//set number of tasks for this block
+var num_tasks = 20;
+
+var isImage = true; //true if we use image targets, false if we use word targets.
+var catA = []; //left category
+var catB = []; //right category
+//set targets here
+catA[0] = "https://stanforduniversity.qualtrics.com/CP/Graphic.php?IM=IM_0UrNqhrO0cHK7GJ";
+catA[1] = "https://stanforduniversity.qualtrics.com/CP/Graphic.php?IM=IM_6i19sMg3xTEXGBf";
+catA[2] = "https://stanforduniversity.qualtrics.com/CP/Graphic.php?IM=IM_bp8Xv9F6IfSHPtX";
+catA[3] = "https://stanforduniversity.qualtrics.com/CP/Graphic.php?IM=IM_6QN1xe9RQUbYDOJ";
+catA[4] = "https://stanforduniversity.qualtrics.com/CP/Graphic.php?IM=IM_cGicPC1QzJMrHWR";
+catA[5] = "https://stanforduniversity.qualtrics.com/CP/Graphic.php?IM=IM_1Apz2zVmnYz17zT";
+
+catB[0] = "https://stanforduniversity.qualtrics.com/CP/Graphic.php?IM=IM_2lxapSOQCuT4eVv";
+catB[1] = "https://stanforduniversity.qualtrics.com/CP/Graphic.php?IM=IM_8pHtXVFAGsPQLVr";
+catB[2] = "https://stanforduniversity.qualtrics.com/CP/Graphic.php?IM=IM_eKU6wKrSaJr0uhf";
+catB[3] = "https://stanforduniversity.qualtrics.com/CP/Graphic.php?IM=IM_9WDpULbJI8B4q0t";
+catB[4] = "https://stanforduniversity.qualtrics.com/CP/Graphic.php?IM=IM_0HcF7EsFIxCwxVz";
+catB[5] = "https://stanforduniversity.qualtrics.com/CP/Graphic.php?IM=IM_dokWcJD7Ax8FKol";
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+//nice utility functions
+
+//image handling
+function get_img_html(url){
+  return "<img src=\""+url+"\">";
+};
+
+function preload_img(url){
+  var img = new Image();
+  img.src = url;
+};
+
+function preload_array(arr){
+  for (var i = 0; i < arr.length; i++){ preload_img(arr[i]); }
+};
+
+//shuffle
+function shuffle(o){ 
+  for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+  return o;
+};
+
+function multishuffle(arrsize, numtrials){
+  var nums = [];
+  for (var i = 0; i < arrsize; i++) {nums[i]=i;}
+  var numshuffles = Math.floor(numtrials/arrsize) + 1;
+  trials = [];
+  for (var i =0; i < numshuffles; i++){trials = trials.concat(shuffle(nums));}
+  return trials.slice(0,numtrials);
+};
+
+function category_array(numtrials){
+  var cat_array = [];
+  for (var i = 0; i < numtrials; i++){cat_array[i] = i%2;}
+  cat_array = shuffle(cat_array);
+  return cat_array;
+}
+
+function balanced_randomize(numtrials, arrsize, category_array){
+  var arrA = multishuffle(arrsize, numtrials/2);
+  var arrB = multishuffle(arrsize, numtrials/2);
+  var neworder = [];
+  var a = 0;
+  var b = 0;
+  for (var i = 0; i < numtrials; i++){ //1s correspond to array A, 0s correspond to array B
+    if (category_array[i]){
+      neworder[i] = arrA[a];
+      a += 1;
+    } else{
+      neworder[i] = arrB[b];
+      b += 1;
+    }
+  }
+  return neworder;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//actual program
+
+var t = 0;
+var c = 0;
+var running = 0;
+var elemid;
+var cats;
+var order;
+
+Qualtrics.SurveyEngine.addOnload(function () //create Qualtrics.SurveyEngine.QuestionData object 
+{ 
+  $('NextButton').hide();
+  var qid = this.questionId;
+  elemid = "QR~"+qid;
+  if (isImage){
+    preload_array(catA);
+    preload_array(catB);
+  }
+  cats = category_array(num_tasks);
+  order = balanced_randomize(num_tasks, catA.length, cats);
+  //console.log(cats);
+  //console.log(order);
+});
+
+function start_it() {
+  if (c < num_tasks) {
+    var day = new Date(); trialstart = day.getTime();
+    var input;
+    if (cats[c]){
+      input = isImage ? get_img_html(catA[order[c]]) : catA[order[c]];
+    } else {
+      input = isImage ? get_img_html(catB[order[c]]) : catB[order[c]];
+    }
+    document.getElementById("Message").innerHTML = "<br>" + input;
+    //console.log("We printed "+order[c] + " with "+cats[c]);
+
+  }
+  else {
+    clearInterval(t)
+    document.getElementById("Message").innerHTML = "<br>You may now proceed to the next section.";
+    document.getElementById(elemid).value = document.getElementById(elemid).value + "END";
+    $('NextButton').show();
+  }
+}
+
+document.onkeyup = function(e){
+  var KeyID = (window.event) ? event.keyCode : e.keyCode;
+  if (c < num_tasks) {
+    if(KeyID == 69)  {
+      var day = new Date(); trialend = day.getTime();
+      rt = trialend - trialstart;
+      if(cats[c]){
+        var entry = order[c] + "." + "C" + "." + cats[c] + "." + rt + ",";
+        //console.log(entry);
+        document.getElementById(elemid).value = document.getElementById(elemid).value + entry;
+        document.getElementById("Message").innerHTML = "<br>+";
+        c=c+1;
+        t = setTimeout('start_it();',250);
+      }
+      else{
+        var entry = order[c] + "." + "X" + "." + cats[c] + "." + rt + ",";
+        //console.log(entry);
+        document.getElementById(elemid).value = document.getElementById(elemid).value + entry;
+        document.getElementById("Message").innerHTML = "<b style='color:red;font-size:80px'>X</b>";
+        c = c+1;
+        t = setTimeout('document.getElementById("Message").innerHTML = "<br>+";',250);
+        t = setTimeout('start_it();',500);
+      }    
+    }
+    
+    if(KeyID == 73)  {
+      var day = new Date(); trialend = day.getTime();
+      rt = trialend - trialstart;
+      if(!cats[c]){
+        var entry = order[c] + "." + "C" + "." + cats[c] + "." + rt + ",";
+        //console.log(entry);
+        document.getElementById(elemid).value = document.getElementById(elemid).value + entry;
+        document.getElementById("Message").innerHTML = "<br>+";
+        c = c+1;
+        t = setTimeout('start_it();',250);
+      }
+      else{
+        var entry = order[c] + "." + "X" + "." + cats[c] + "." + rt + ",";
+        //console.log(entry);
+        document.getElementById(elemid).value = document.getElementById(elemid).value + entry;
+        document.getElementById("Message").innerHTML = "<b style='color:red;font-size:80px'>X</b>";
+        c=c+1;
+        t = setTimeout('document.getElementById("Message").innerHTML = "<br>+";',250);
+        t = setTimeout('start_it();',500);
+      }
+        
+    }
+
+    if(KeyID == 32)  {
+      if (running == 0) {
+        document.getElementById('instructions').style.display = "none";
+        c = 0;
+        running = 1;
+        start_it();
+      }
+    }
+  }
+
+};
+
+
+</script>
+<center><b style="font-size:30px">White American &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Black American</b>
+<h2 id="Message" style="font-size:30px">+</h2>
+&nbsp;
+
+<p id="instructions">Put your middle or index fingers on the E and I keys of your keyboard. &nbsp; Pictures or words representing the categories at the top will appear one-by-one in the middle of the screen. When the item belongs to a category on the left, press the E key; when the item belongs to a category on the right, press the I key. Items belong to only one category. If you make an error, an X will appear.<br />
+This is a timed sorting task. GO AS FAST AS YOU CAN while making as few mistakes as possible. Going too slow or making too many errors will result in an uninterpretable score. This task will take about 5 minutes to complete.<br />
+<br />
+Press SPACE to continue.<br />
+Part 1 of 7</p>
+</center>
